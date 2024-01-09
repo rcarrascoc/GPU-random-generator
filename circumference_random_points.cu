@@ -7,18 +7,20 @@
 
 // Define the REAL type as float
 #define REAL float
+
 #define REPEAT 10
 
-#include "uniform_random_points.cuh"
+#include "circumference_random_points.cuh"
 
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " [gpu/omp/seq] [n_points]" << std::endl;
+    if (argc != 4) {
+        std::cerr << "Usage: " << argv[0] << " [gpu/omp/seq] [n_points] [prob]" << std::endl;
         return 1;
     }
     std::string mode(argv[1]);
     int n = std::stoi(argv[2]);
+    double prob = std::stod(argv[3]);
 
     REAL *x, *y, *d_x, *d_y;
 
@@ -48,17 +50,17 @@ int main(int argc, char* argv[]) {
     if (mode == "gpu") {
         #ifdef USE_GPU
         for (int i = 0; i < REPEAT; i++)
-            generate_random_uniform_points_gpu<REAL>(n, d_x, d_y);
+            generate_random_circumference_points_gpu<REAL>(n, d_x, d_y, prob);
         #else
         std::cerr << "GPU mode not supported. Compile with -DUSE_GPU flag." << std::endl;
         return 1;
         #endif
     } else if (mode == "omp") {
         for (int i = 0; i < REPEAT; i++)
-            generate_random_uniform_points_omp<REAL>(n, x, y);
+            generate_random_circumference_points_omp<REAL>(n, x, y, prob);
     } else if (mode == "seq") {
         for (int i = 0; i < REPEAT; i++)
-            generate_random_uniform_points<REAL>(n, x, y);
+            generate_random_circumference_points<REAL>(n, x, y, prob);
     } else {
         std::cerr << "Invalid mode. Use 'gpu', 'omp', or 'seq'." << std::endl;
         return 1;
@@ -66,7 +68,7 @@ int main(int argc, char* argv[]) {
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
-    std::cout << "Time taken (" << mode << "): " << elapsed.count() << " seconds." << std::endl;
+    std::cout << "Time taken (" << mode << "): " << elapsed.count()/REPEAT << " seconds." << std::endl;
 
     #ifdef SAVE_OFF
     // Write to .off file

@@ -7,6 +7,7 @@
 
 // Define the REAL type as float
 #define REAL float
+#define REPEAT 10
 
 #include "normal_random_points.cuh"
 
@@ -46,15 +47,18 @@ int main(int argc, char* argv[]) {
 
     if (mode == "gpu") {
         #ifdef USE_GPU
-        generate_random_normal_points_gpu<REAL>(n, d_x, d_y);
+        for (int i = 0; i < REPEAT; i++)
+            generate_random_normal_points_gpu<REAL>(n, d_x, d_y);
         #else
         std::cerr << "GPU mode not supported. Compile with -DUSE_GPU flag." << std::endl;
         return 1;
         #endif
     } else if (mode == "omp") {
-        generate_random_normal_points_omp<REAL>(n, x, y);
+        for (int i = 0; i < REPEAT; i++)
+            generate_random_normal_points_omp<REAL>(n, x, y);
     } else if (mode == "seq") {
-        generate_random_normal_points<REAL>(n, x, y);
+        for (int i = 0; i < REPEAT; i++)
+            generate_random_normal_points<REAL>(n, x, y);
     } else {
         std::cerr << "Invalid mode. Use 'gpu', 'omp', or 'seq'." << std::endl;
         return 1;

@@ -1,5 +1,5 @@
 
-all: clean normal_random_points uniform_random_points
+all: clean normal_random_points uniform_random_points circumference_random_points
 
 alt: clean normal_random_points_saveoff uniform_random_points_saveoff
 
@@ -23,5 +23,15 @@ uniform_random_points: uniform_random_points.cu
 uniform_random_points_saveoff: uniform_random_points.cu
 	nvcc -Xcompiler -fopenmp -o uniform_random_points -DUSE_GPU -DSAVE_OFF uniform_random_points.cu -lcurand -O3
 
+circumference: circumference_random_points
+
+circumference_off: circumference_random_points_saveoff
+
+circumference_random_points: circumference_random_points.cu
+	nvcc -Xcompiler -fopenmp -o circumference_random_points -DUSE_GPU circumference_random_points.cu -lcurand -O3
+
+circumference_random_points_saveoff: circumference_random_points.cu
+	nvcc -Xcompiler -fopenmp -o circumference_random_points -DUSE_GPU -DSAVE_OFF circumference_random_points.cu -lcurand -O3
+
 clean:
-	rm -f normal_random_points uniform_random_points
+	rm -f normal_random_points uniform_random_points circumference_random_points
