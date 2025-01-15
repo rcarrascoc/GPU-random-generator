@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
 
     #ifdef SAVE_OFF
     // Write to .off file
-    std::string filename = "points_" + mode + ".off";
+    std::string filename = "points_uniform_" + mode + ".off";
     std::ofstream offFile(filename);
     offFile << "OFF\n";
     offFile << n << " 0 0\n";

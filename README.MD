@@ -1,7 +1,7 @@
 This repository contains many methods to generate three types of distributions on GPU, OMP and sequential CPU:
 1.- Normal distribution
 2.- Uniform distribution
-3.- Sphere and shifted sphere distribution
+3.- Sphere and displaced sphere distribution
 
 compile as:
     make
@@ -16,7 +16,7 @@ run the benchmarks as:
     ./normal_random_3d_points [gpu/omp/seq] [n_points]
     ./uniform_random_3d_points [gpu/omp/seq] [n_points]
 
-You can check the distribution using the jupyter file
+You can check the distributions using the jupyter file
 
 Variables:
 REPEAT: number of repetitions of the experiment
