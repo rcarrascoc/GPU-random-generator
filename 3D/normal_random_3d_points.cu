@@ -6,20 +6,33 @@
 
 // Define the REAL type as float
 #define REAL float
-#define REPEAT 10
+#define REPEAT 1
 
 #include "normal_random_3d_points.cuh"
 
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " [gpu/omp/seq] [n_points]" << std::endl;
+    if (argc != 
+        #ifdef SAVE_OFF 
+        5
+        #else
+        4
+        #endif
+    ) {
+
+        std::cerr << "Usage: " << argv[0] << " [gpu/omp/seq] [n_points] [seed]"
+        #ifdef SAVE_OFF
+        "[output_name]"
+        #endif
+        << std::endl;
         return 1;
     }
     std::string mode(argv[1]);
     int n = std::stoi(argv[2]);
-
-    unsigned int seed = 0; //static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
+    unsigned int seed = std::stoul(argv[3]);
+    #ifdef SAVE_OFF
+    std::string output_name(argv[4]);
+    #endif
 
     REAL *x, *y, *z, *d_x, *d_y, *d_z;
 
@@ -74,7 +87,7 @@ int main(int argc, char* argv[]) {
 
     #ifdef SAVE_OFF
     // Write to .off file
-    std::string filename = "points_normal_" + mode + ".off";
+    std::string filename = output_name + ".off";
     std::ofstream offFile(filename);
     offFile << "OFF\n";
     offFile << n << " 0 0\n";

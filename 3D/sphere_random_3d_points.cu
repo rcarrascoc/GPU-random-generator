@@ -7,20 +7,36 @@
 // Define the REAL type as float
 #define REAL float
 
-#define REPEAT 10
+#define REPEAT 1
 
 #include "sphere_random_3d_points.cuh"
 
-
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " [gpu/omp/seq] [n_points] [prob]" << std::endl;
+    
+    
+    if (argc != 
+        #ifdef SAVE_OFF 
+        6
+        #else
+        5
+        #endif
+    ) {
+        std::cerr << "Usage: " << argv[0] << " [gpu/omp/seq] [n_points] [prob] [seed]"
+        #ifdef SAVE_OFF
+        "[output_name]"
+        #endif
+        << std::endl;
         return 1;
     }
+
     std::string mode(argv[1]);
     int n = std::stoi(argv[2]);
     double prob = std::stod(argv[3]);
-    unsigned long seed = 0; //std::chrono::system_clock::now().time_since_epoch().count();
+    unsigned long seed = std::stoul(argv[4]);
+    #ifdef SAVE_OFF
+    std::string output_name(argv[5]);
+    #endif
+
 
     REAL *x, *y, *z, *d_x, *d_y, *d_z;
 
@@ -75,7 +91,7 @@ int main(int argc, char* argv[]) {
 
     #ifdef SAVE_OFF
     // Write to .off file
-    std::string filename = "points_sphere_" + mode + ".off";
+    std::string filename = output_name + ".off";
     std::ofstream offFile(filename);
     offFile << "OFF\n";
     offFile << n << " 0 0\n";
