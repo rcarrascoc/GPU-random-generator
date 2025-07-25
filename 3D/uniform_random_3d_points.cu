@@ -9,6 +9,7 @@
 #define REPEAT 1
 
 #include "uniform_random_3d_points.cuh"
+#include "normalization.cuh"
 
 int main(int argc, char* argv[]) {
     if (argc != 
@@ -65,6 +66,7 @@ int main(int argc, char* argv[]) {
         #ifdef USE_GPU
         for (int i = 0; i < REPEAT; i++)
             generate_random_uniform_points_gpu<REAL>(n, d_x, d_y, d_z, seed);
+
         #else
         std::cerr << "GPU mode not supported. Compile with -DUSE_GPU flag." << std::endl;
         return 1;
@@ -72,11 +74,29 @@ int main(int argc, char* argv[]) {
     } else if (mode == "omp") {
         for (int i = 0; i < REPEAT; i++)
             generate_random_uniform_points_omp<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data in parallel
+        normalize_cpu_data_omp(x, y, z, n);
     } else if (mode == "seq") {
         for (int i = 0; i < REPEAT; i++)
             generate_random_uniform_points<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data
+        normalize_cpu_data(x, y, z, n);
+    } else if (mode == "unique_omp") {
+        for (int i = 0; i < REPEAT; i++)
+            generate_unique_random_uniform_points_omp<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data in parallel
+        normalize_cpu_data_omp(x, y, z, n);
+    } else if (mode == "unique") {
+        for (int i = 0; i < REPEAT; i++)
+            generate_unique_random_uniform_points<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data
+        normalize_cpu_data(x, y, z, n);
     } else {
-        std::cerr << "Invalid mode. Use 'gpu', 'omp', or 'seq'." << std::endl;
+        std::cerr << "Invalid mode. Use 'gpu', 'omp', 'seq', 'unique', or 'unique_omp'." << std::endl;
         return 1;
     }
 

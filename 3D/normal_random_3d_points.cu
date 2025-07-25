@@ -3,12 +3,15 @@
 #include <string>
 #include <chrono>
 #include <cuda_runtime.h>
+#include <thrust/extrema.h>
+#include <thrust/device_vector.h>
 
 // Define the REAL type as float
 #define REAL float
 #define REPEAT 1
 
 #include "normal_random_3d_points.cuh"
+#include "normalization.cuh"
 
 
 int main(int argc, char* argv[]) {
@@ -66,6 +69,19 @@ int main(int argc, char* argv[]) {
         #ifdef USE_GPU
         for (int i = 0; i < REPEAT; i++)
             generate_random_normal_points_gpu<REAL>(n, d_x, d_y, d_z, seed);
+
+        // Normalize GPU data
+        REAL max_val_x, min_val_x, max_val_y, min_val_y, max_val_z, min_val_z;
+        checkCudaError(cudaMemcpy(&max_val_x, thrust::max_element(thrust::device, d_x, d_x + n), sizeof(REAL), cudaMemcpyDeviceToHost), "cudaMemcpy max_x failed");
+        checkCudaError(cudaMemcpy(&min_val_x, thrust::min_element(thrust::device, d_x, d_x + n), sizeof(REAL), cudaMemcpyDeviceToHost), "cudaMemcpy min_x failed");
+        checkCudaError(cudaMemcpy(&max_val_y, thrust::max_element(thrust::device, d_y, d_y + n), sizeof(REAL), cudaMemcpyDeviceToHost), "cudaMemcpy max_y failed");
+        checkCudaError(cudaMemcpy(&min_val_y, thrust::min_element(thrust::device, d_y, d_y + n), sizeof(REAL), cudaMemcpyDeviceToHost), "cudaMemcpy min_y failed");
+        checkCudaError(cudaMemcpy(&max_val_z, thrust::max_element(thrust::device, d_z, d_z + n), sizeof(REAL), cudaMemcpyDeviceToHost), "cudaMemcpy max_z failed");
+        checkCudaError(cudaMemcpy(&min_val_z, thrust::min_element(thrust::device, d_z, d_z + n), sizeof(REAL), cudaMemcpyDeviceToHost), "cudaMemcpy min_z failed");
+
+        normalize_gpu_data<<<(n + 255) / 256, 256>>>(d_x, d_y, d_z, n, min_val_x, max_val_x, min_val_y, max_val_y, min_val_z, max_val_z);
+        checkCudaError(cudaGetLastError(), "Normalization kernel launch failed");
+        checkCudaError(cudaDeviceSynchronize(), "CUDA Device Synchronization failed after normalization");
         #else
         std::cerr << "GPU mode not supported. Compile with -DUSE_GPU flag." << std::endl;
         return 1;
@@ -73,11 +89,27 @@ int main(int argc, char* argv[]) {
     } else if (mode == "omp") {
         for (int i = 0; i < REPEAT; i++)
             generate_random_normal_points_omp<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data in parallel
+        normalize_cpu_data_omp(x, y, z, n);
     } else if (mode == "seq") {
         for (int i = 0; i < REPEAT; i++)
             generate_random_normal_points<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data
+        normalize_cpu_data(x, y, z, n);
+    } else if (mode == "unique") {
+        generate_unique_random_normal_points<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data
+        normalize_cpu_data(x, y, z, n);
+    } else if (mode == "unique_omp") {
+        generate_unique_random_normal_points_omp<REAL>(n, x, y, z, seed);
+
+        // Normalize CPU data
+        normalize_cpu_data_omp(x, y, z, n);
     } else {
-        std::cerr << "Invalid mode. Use 'gpu', 'omp', or 'seq'." << std::endl;
+        std::cerr << "Invalid mode. Use 'gpu', 'omp', 'seq', 'unique', or 'unique_omp'." << std::endl;
         return 1;
     }
 

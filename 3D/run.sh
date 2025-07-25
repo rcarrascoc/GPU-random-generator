@@ -5,6 +5,9 @@
 # run as:
 # ./run.sh 100 100 1000 10 sphere_random_3d_points omp 0.1 1 output/sphere
 # ./run.sh 100 100 1000 10 normal_random_3d_points omp " " 1 output/normal
+# ./run.sh $((2**23)) $((2**23)) $((2**28)) 10 uniform_random_3d_points omp " " 9000 output/uniform
+# ./run.sh $((2**23)) $((2**23)) $((2**28)) 10 normal_random_3d_points omp " " 9000 output/normal
+# ./run.sh $((2**23)) $((2**23)) $((2**28)) 10 sphere_random_3d_points omp 0.1 9000 output/sphere
 
 # Configuración inicial
 STARTN=$1  # Tamaño inicial
@@ -21,11 +24,11 @@ echo "Iniciando ejecución del script para distintos tamaños de entrada y algor
 
 for ((N=STARTN; N<=ENDN; N+=DN));
 do
-    echo -n "${N}  " >> "${OUTFILE}"
+    #echo -n "${N}  " >> "${OUTFILE}"
     for ((k=1; k<=SAMPLES; k++));
     do
         #la seed que se usa es seed*example
-        SEED2=$((SEED * k * SAMPLES))
+        SEED2=$((SEED * k ))
         OUTFILE2="${OUTFILE}_${N}_${SEED2}"
         #echo -n "${OUTFILE2}  "
         echo  "./${BINARY} ${ALG} ${N} $PROB $SEED2 $OUTFILE2"
@@ -33,9 +36,9 @@ do
         echo " "
     done
     echo " "
-    echo " " >> "${OUTFILE}"
+    #echo " " >> "${OUTFILE}"
 done
-echo " " >> "${OUTFILE}"
+#echo " " >> "${OUTFILE}"
 echo " "
 
 echo "Finalizando ejecución del script"
