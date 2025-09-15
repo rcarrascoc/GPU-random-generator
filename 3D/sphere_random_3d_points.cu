@@ -101,8 +101,8 @@ int main(int argc, char* argv[]) {
     // Write to .off file
     std::string filename = output_name + ".off";
     std::ofstream offFile(filename);
-    offFile << "OFF\n";
-    offFile << n << " 0 0\n";
+//    offFile << "OFF\n";
+//    offFile << n << " 0 0\n";
     if (mode == "gpu") {
         #ifdef USE_GPU
         // Allocate host memory for GPU data
